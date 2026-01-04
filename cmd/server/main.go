@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/guiferpa/guidger/domain/ledger"
@@ -25,5 +26,7 @@ func main() {
 		},
 	})
 
-	s.ListenAndServe()
+	if err := s.ListenAndServe(); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }

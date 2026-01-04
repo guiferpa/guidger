@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/guiferpa/guidger/domain/account"
+	"github.com/guiferpa/guidger/domain/ledger"
 	"github.com/guiferpa/guidger/domain/webhook"
 )
 
 type DomainOptions struct {
-	Account account.Account
+	Ledger  ledger.Ledger
 	Webhook webhook.Webhook
 }
 
@@ -26,7 +26,7 @@ func NewHTTPServer(opts NewHTTPServerOptions) *http.Server {
 	router := chi.NewRouter()
 
 	router.Route("/webhook", func(r chi.Router) {
-		r.Post("/", ProcessWebhook(opts.Domain.Webhook, opts.Domain.Account))
+		r.Post("/", ProcessWebhook(opts.Domain.Webhook, opts.Domain.Ledger))
 	})
 
 	return &http.Server{

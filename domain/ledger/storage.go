@@ -1,5 +1,5 @@
-package account
+package ledger
 
-type Ledger interface {
+type Storage interface {
 	Apply(user string, asset string, amount int64) error
 }

@@ -29,6 +29,10 @@ func NewServerHTTP(opts NewServerHTTPOptions) *http.Server {
 		r.Post("/", ProcessWebhook(opts.Domain.Webhook, opts.Domain.Ledger))
 	})
 
+	router.Route("/balance", func(r chi.Router) {
+		r.Get("/{user}", GetBalance(opts.Domain.Ledger))
+	})
+
 	return &http.Server{
 		Addr:    opts.Port,
 		Handler: router,

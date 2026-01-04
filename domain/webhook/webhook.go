@@ -9,7 +9,6 @@ import (
 var (
 	ErrTimestampTooOld      = errors.New("timestamp is too old")
 	ErrTimestampInTheFuture = errors.New("timestamp is in the future")
-	ErrInvalidSignature     = errors.New("invalid signature")
 )
 
 type Webhook interface {

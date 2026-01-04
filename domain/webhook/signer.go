@@ -1,5 +1,9 @@
 package webhook
 
+import "errors"
+
+var ErrInvalidSignature = errors.New("invalid signature")
+
 type Signer interface {
 	GenerateSignature(canonicalString, secret string) []byte
 	ValidateSignature(providedSignature, signature string) bool

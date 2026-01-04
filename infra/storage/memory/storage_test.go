@@ -10,12 +10,12 @@ import (
 
 func TestUseWebhookSignatureNonce_NotAlreadyUsed(t *testing.T) {
 	sm := NewStorageMemory()
-	err := sm.UseWebhookSignatureNonce("nonce", time.Now().Add(1*time.Second))
+	err := sm.UseWebhookSignatureNonce("nonce", 1*time.Second)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
 	time.Sleep(2 * time.Second)
-	err = sm.UseWebhookSignatureNonce("nonce", time.Now().Add(1*time.Minute))
+	err = sm.UseWebhookSignatureNonce("nonce", 1*time.Minute)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -23,11 +23,11 @@ func TestUseWebhookSignatureNonce_NotAlreadyUsed(t *testing.T) {
 
 func TestUseWebhookSignatureNonce_AlreadyUsed(t *testing.T) {
 	sm := NewStorageMemory()
-	err := sm.UseWebhookSignatureNonce("nonce", time.Now().Add(1*time.Minute))
+	err := sm.UseWebhookSignatureNonce("nonce", 1*time.Minute)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	err = sm.UseWebhookSignatureNonce("nonce", time.Now().Add(1*time.Minute))
+	err = sm.UseWebhookSignatureNonce("nonce", 1*time.Minute)
 	if err == nil {
 		t.Fatalf("expected error, got nil")
 	}

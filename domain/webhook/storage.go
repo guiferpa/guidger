@@ -10,5 +10,21 @@ var (
 )
 
 type Storage interface {
-	UseWebhookSignatureNonce(nonce string, ttl time.Time) error
+	UseWebhookSignatureNonce(nonce string, ttl time.Duration) error
+}
+
+type MockStorage struct {
+	UseWebhookSignatureNonceFunc func(nonce string, ttl time.Duration) error
+}
+
+func (m *MockStorage) UseWebhookSignatureNonce(nonce string, ttl time.Duration) error {
+	return m.UseWebhookSignatureNonceFunc(nonce, ttl)
+}
+
+func NewMockStorage() *MockStorage {
+	return &MockStorage{
+		UseWebhookSignatureNonceFunc: func(nonce string, ttl time.Duration) error {
+			return nil
+		},
+	}
 }

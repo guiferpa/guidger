@@ -16,14 +16,15 @@ func (s *StorageMemory) UpdateLedger(user string, asset string, amount int64) er
 	return nil
 }
 
-func (s *StorageMemory) UseWebhookSignatureNonce(nonce string, ttl time.Time) error {
-	dur, ok := s.webhookNonces[nonce]
+func (s *StorageMemory) UseWebhookSignatureNonce(nonce string, ttl time.Duration) error {
+	now := time.Now()
+	v, ok := s.webhookNonces[nonce]
 	if !ok {
-		s.webhookNonces[nonce] = ttl
+		s.webhookNonces[nonce] = now.Add(ttl)
 		return nil
 	}
-	if time.Now().After(dur) {
-		s.webhookNonces[nonce] = ttl
+	if now.After(v) {
+		s.webhookNonces[nonce] = now.Add(ttl)
 		return nil
 	}
 	return webhook.ErrNonceAlreadyUsed

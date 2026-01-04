@@ -41,17 +41,31 @@ func TestValidateTimestamp_InTheFuture(t *testing.T) {
 	}
 }
 
-func TestValidateSignature(t *testing.T) {
-	whk := New(NewOptions{})
-	err := whk.ValidateSignature("signature")
+func TestValidateNonce(t *testing.T) {
+	whk := New(NewOptions{Storage: NewMockStorage()})
+	err := whk.ValidateNonce("nonce")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
 }
 
-func TestValidateNonce(t *testing.T) {
-	whk := New(NewOptions{})
-	err := whk.ValidateNonce()
+func TestGenerateCanonicalString(t *testing.T) {
+	whk := &whk{}
+	canonicalString := whk.generateCanonicalString(1, "nonce", []byte("payload"))
+	expected := "1.nonce.payload"
+	if canonicalString != expected {
+		t.Fatalf("expected %s, got %s", expected, canonicalString)
+	}
+}
+
+func TestValidateSignature(t *testing.T) {
+	whk := New(NewOptions{
+		Signer:             NewMockSigner(),
+		Storage:            NewMockStorage(),
+		SignatureTolerance: 1 * time.Minute,
+		SignatureSecret:    "secret",
+	})
+	err := whk.ValidateSignature(time.Now().Unix(), "nonce", []byte("payload"), "signature")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}

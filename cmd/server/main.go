@@ -20,6 +20,7 @@ func main() {
 			}),
 			Webhook: webhook.New(webhook.NewOptions{
 				SignatureTolerance: 5 * time.Minute,
+				Storage:            sm,
 			}),
 		},
 	})

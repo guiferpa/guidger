@@ -18,6 +18,7 @@ type Webhook interface {
 
 type whk struct {
 	signatureTolerance time.Duration
+	storage            Storage
 }
 
 func (w *whk) ValidateTimestamp(timestamp int64) error {
@@ -43,8 +44,9 @@ func (w *whk) ValidateNonce() error {
 
 type NewOptions struct {
 	SignatureTolerance time.Duration
+	Storage            Storage
 }
 
 func New(opts NewOptions) Webhook {
-	return &whk{signatureTolerance: opts.SignatureTolerance}
+	return &whk{signatureTolerance: opts.SignatureTolerance, storage: opts.Storage}
 }

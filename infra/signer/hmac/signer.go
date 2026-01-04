@@ -5,18 +5,18 @@ import (
 	"crypto/sha256"
 )
 
-type SignerHMAC struct{}
+type HMACSigner struct{}
 
-func (s *SignerHMAC) GenerateSignature(canonicalString, secret string) []byte {
+func (s *HMACSigner) GenerateSignature(canonicalString, secret string) []byte {
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte(canonicalString))
 	return mac.Sum(nil)
 }
 
-func (s *SignerHMAC) ValidateSignature(providedSignature, signature string) bool {
+func (s *HMACSigner) ValidateSignature(providedSignature, signature string) bool {
 	return hmac.Equal([]byte(providedSignature), []byte(signature))
 }
 
-func NewSignerHMAC() *SignerHMAC {
-	return &SignerHMAC{}
+func NewHMACSigner() *HMACSigner {
+	return &HMACSigner{}
 }

@@ -13,12 +13,12 @@ type DomainOptions struct {
 	Webhook webhook.Webhook
 }
 
-type NewHTTPServerOptions struct {
+type NewServerHTTPOptions struct {
 	Port   string
 	Domain DomainOptions
 }
 
-func NewHTTPServer(opts NewHTTPServerOptions) *http.Server {
+func NewServerHTTP(opts NewServerHTTPOptions) *http.Server {
 	if opts.Port == "" {
 		opts.Port = ":8080"
 	}

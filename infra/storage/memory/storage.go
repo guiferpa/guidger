@@ -6,17 +6,17 @@ import (
 	"github.com/guiferpa/guidger/domain/webhook"
 )
 
-type StorageMemory struct {
+type MemoryStorage struct {
 	ledger        map[string]map[string]int64
 	webhookNonces map[string]time.Time
 }
 
-func (s *StorageMemory) UpdateLedger(user string, asset string, amount int64) error {
+func (s *MemoryStorage) UpdateLedger(user string, asset string, amount int64) error {
 	s.ledger[user][asset] += amount
 	return nil
 }
 
-func (s *StorageMemory) UseWebhookSignatureNonce(nonce string, ttl time.Duration) error {
+func (s *MemoryStorage) UseWebhookSignatureNonce(nonce string, ttl time.Duration) error {
 	now := time.Now()
 	v, ok := s.webhookNonces[nonce]
 	if !ok {
@@ -30,8 +30,8 @@ func (s *StorageMemory) UseWebhookSignatureNonce(nonce string, ttl time.Duration
 	return webhook.ErrNonceAlreadyUsed
 }
 
-func NewStorageMemory() *StorageMemory {
-	return &StorageMemory{
+func NewMemoryStorage() *MemoryStorage {
+	return &MemoryStorage{
 		ledger:        make(map[string]map[string]int64),
 		webhookNonces: make(map[string]time.Time),
 	}

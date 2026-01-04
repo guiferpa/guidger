@@ -9,7 +9,7 @@ import (
 )
 
 func TestUseWebhookSignatureNonce_NotAlreadyUsed(t *testing.T) {
-	sm := NewStorageMemory()
+	sm := NewMemoryStorage()
 	err := sm.UseWebhookSignatureNonce("nonce", 1*time.Second)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -22,7 +22,7 @@ func TestUseWebhookSignatureNonce_NotAlreadyUsed(t *testing.T) {
 }
 
 func TestUseWebhookSignatureNonce_AlreadyUsed(t *testing.T) {
-	sm := NewStorageMemory()
+	sm := NewMemoryStorage()
 	err := sm.UseWebhookSignatureNonce("nonce", 1*time.Minute)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)

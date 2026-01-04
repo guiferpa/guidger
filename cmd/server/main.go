@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	sm := memory.NewStorageMemory()
-	sgr := hmac.NewSignerHMAC()
+	sm := memory.NewMemoryStorage()
+	sgr := hmac.NewHMACSigner()
 
-	s := server.NewHTTPServer(server.NewHTTPServerOptions{
+	s := server.NewServerHTTP(server.NewServerHTTPOptions{
 		Port: ":8080",
 		Domain: server.DomainOptions{
 			Ledger: ledger.New(ledger.NewOptions{

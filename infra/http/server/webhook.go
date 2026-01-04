@@ -11,7 +11,7 @@ import (
 
 type ProcessWebhookRequestBody struct {
 	Asset  string `json:"asset"`
-	Amount int64  `json:"amount"`
+	Amount string `json:"amount"`
 	User   string `json:"user"`
 }
 

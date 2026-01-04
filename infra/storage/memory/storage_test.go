@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guiferpa/guidger/domain/ledger"
 	"github.com/guiferpa/guidger/domain/webhook"
 )
 
@@ -33,5 +34,24 @@ func TestUseWebhookSignatureNonce_AlreadyUsed(t *testing.T) {
 	}
 	if !errors.Is(err, webhook.ErrNonceAlreadyUsed) {
 		t.Fatalf("expected error, got %v, want %v", err, webhook.ErrNonceAlreadyUsed)
+	}
+}
+
+func TestUpdateLedger(t *testing.T) {
+	sm := NewMemoryStorage()
+	err := sm.UpdateLedger("user", "asset", "1.0")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+func TestUpdateLedger_InvalidAmount(t *testing.T) {
+	sm := NewMemoryStorage()
+	err := sm.UpdateLedger("user", "asset", "invalid")
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+	if !errors.Is(err, ledger.ErrInvalidAmount) {
+		t.Fatalf("expected error, got %v, want %v", err, ledger.ErrInvalidAmount)
 	}
 }

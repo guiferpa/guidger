@@ -38,7 +38,7 @@ func (w *whk) ValidateTimestamp(timestamp int64) error {
 }
 
 func (w *whk) generateCanonicalString(timestamp int64, nonce string, payload []byte) string {
-	return fmt.Sprintf("%d.%s.%s", timestamp, nonce, string(payload))
+	return fmt.Sprintf("%d\n%s\n%s", timestamp, nonce, string(payload))
 }
 
 func (w *whk) ValidateSignature(timestamp int64, nonce string, payload []byte, signature string) error {

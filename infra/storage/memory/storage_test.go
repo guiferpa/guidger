@@ -55,3 +55,21 @@ func TestUpdateLedger_InvalidAmount(t *testing.T) {
 		t.Fatalf("expected error, got %v, want %v", err, ledger.ErrInvalidAmount)
 	}
 }
+
+func TestGetLedgerBalanceByUser_ETH(t *testing.T) {
+	sm := NewMemoryStorage()
+	err := sm.UpdateLedger("user", "asset", "1.0")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	balances, err := sm.GetLedgerBalanceByUser("user")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(balances) != 1 {
+		t.Fatalf("expected 1 balance, got %d", len(balances))
+	}
+	if balances["asset"] != "1.0" {
+		t.Fatalf("expected balance of 1.0, got %s", balances["asset"])
+	}
+}

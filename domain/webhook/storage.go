@@ -1,11 +1,14 @@
 package webhook
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 var (
 	ErrNonceAlreadyUsed = errors.New("nonce already used")
 )
 
 type Storage interface {
-	UseWebhookSignatureNonce(nonce string) error
+	UseWebhookSignatureNonce(nonce string, ttl time.Time) error
 }

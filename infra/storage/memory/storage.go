@@ -8,7 +8,7 @@ import (
 
 type StorageMemory struct {
 	ledger        map[string]map[string]int64
-	webhookNonces map[string]time.Duration
+	webhookNonces map[string]time.Time
 }
 
 func (s *StorageMemory) UpdateLedger(user string, asset string, amount int64) error {
@@ -16,13 +16,22 @@ func (s *StorageMemory) UpdateLedger(user string, asset string, amount int64) er
 	return nil
 }
 
-func (s *StorageMemory) UseWebhookSignatureNonce(nonce string) error {
-	if _, ok := s.webhookNonces[nonce]; ok {
-		return webhook.ErrNonceAlreadyUsed
+func (s *StorageMemory) UseWebhookSignatureNonce(nonce string, ttl time.Time) error {
+	dur, ok := s.webhookNonces[nonce]
+	if !ok {
+		s.webhookNonces[nonce] = ttl
+		return nil
 	}
-	return nil
+	if time.Now().After(dur) {
+		s.webhookNonces[nonce] = ttl
+		return nil
+	}
+	return webhook.ErrNonceAlreadyUsed
 }
 
 func NewStorageMemory() *StorageMemory {
-	return &StorageMemory{ledger: make(map[string]map[string]int64)}
+	return &StorageMemory{
+		ledger:        make(map[string]map[string]int64),
+		webhookNonces: make(map[string]time.Time),
+	}
 }

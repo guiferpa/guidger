@@ -1,7 +1,9 @@
 package server
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/guiferpa/guidger/domain/ledger"
@@ -18,13 +20,25 @@ type NewServerHTTPOptions struct {
 	Domain DomainOptions
 }
 
+// NewServerHTTP creates a new HTTP server with structured logging and routing configured
 func NewServerHTTP(opts NewServerHTTPOptions) *http.Server {
 	if opts.Port == "" {
 		opts.Port = ":8080"
 	}
 
+	// Initialize structured logger
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+
 	router := chi.NewRouter()
 
+	// Apply middleware (order matters)
+	router.Use(RequestIDMiddleware)
+	router.Use(LoggingMiddleware(logger))
+	router.Use(ErrorLoggingMiddleware(logger))
+
+	// Routes
 	router.Route("/webhook", func(r chi.Router) {
 		r.Post("/", ProcessWebhook(opts.Domain.Webhook, opts.Domain.Ledger))
 	})

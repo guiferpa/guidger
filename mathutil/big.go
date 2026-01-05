@@ -14,6 +14,9 @@ func (e *InvalidAmountError) Error() string {
 	return "invalid amount format: " + e.Amount
 }
 
+// Big represents a decimal number with preserved precision
+// It wraps big.Rat for exact mathematical operations while maintaining
+// the original number of decimal places from the input string
 type Big struct {
 	amount    *big.Rat
 	precision int

@@ -7,8 +7,11 @@ import (
 )
 
 var (
+	// ErrRequiredEnvironmentVariable is returned when a required environment variable is not set
 	ErrRequiredEnvironmentVariable = errors.New("required environment variable is not set")
-	ErrFailedToParseInteger        = errors.New("failed to parse integer")
+
+	// ErrFailedToParseInteger is returned when an environment variable cannot be parsed as an integer
+	ErrFailedToParseInteger = errors.New("failed to parse integer")
 )
 
 // GetString retrieves an environment variable as a string

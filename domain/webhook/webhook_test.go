@@ -49,15 +49,6 @@ func TestValidateNonce(t *testing.T) {
 	}
 }
 
-func TestGenerateCanonicalString(t *testing.T) {
-	whk := &whk{}
-	canonicalString := whk.generateCanonicalString(1, "nonce", []byte("payload"))
-	expected := "1\nnonce\npayload"
-	if canonicalString != expected {
-		t.Fatalf("expected %s, got %s", expected, canonicalString)
-	}
-}
-
 func TestValidateSignature(t *testing.T) {
 	whk := New(NewOptions{
 		Signer:             NewMockSigner(),

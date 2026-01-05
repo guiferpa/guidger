@@ -5,17 +5,17 @@ import "errors"
 var ErrInvalidSignature = errors.New("invalid signature")
 
 type Signer interface {
-	GenerateSignature(canonicalString, secret string) []byte
+	GenerateSignature(timestamp int64, nonce string, payload []byte, secret string) string
 	ValidateSignature(providedSignature, signature string) bool
 }
 
 type MockSigner struct {
-	GenerateSignatureFunc func(canonicalString, secret string) []byte
+	GenerateSignatureFunc func(timestamp int64, nonce string, payload []byte, secret string) string
 	ValidateSignatureFunc func(providedSignature, signature string) bool
 }
 
-func (m *MockSigner) GenerateSignature(canonicalString, secret string) []byte {
-	return m.GenerateSignatureFunc(canonicalString, secret)
+func (m *MockSigner) GenerateSignature(timestamp int64, nonce string, payload []byte, secret string) string {
+	return m.GenerateSignatureFunc(timestamp, nonce, payload, secret)
 }
 
 func (m *MockSigner) ValidateSignature(providedSignature, signature string) bool {
@@ -24,8 +24,8 @@ func (m *MockSigner) ValidateSignature(providedSignature, signature string) bool
 
 func NewMockSigner() *MockSigner {
 	return &MockSigner{
-		GenerateSignatureFunc: func(canonicalString, secret string) []byte {
-			return []byte("")
+		GenerateSignatureFunc: func(timestamp int64, nonce string, payload []byte, secret string) string {
+			return ""
 		},
 		ValidateSignatureFunc: func(providedSignature, signature string) bool {
 			return true

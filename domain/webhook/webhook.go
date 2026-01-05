@@ -2,7 +2,6 @@ package webhook
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -37,10 +36,6 @@ func (w *whk) ValidateTimestamp(timestamp int64) error {
 	return nil
 }
 
-func (w *whk) generateCanonicalString(timestamp int64, nonce string, payload []byte) string {
-	return fmt.Sprintf("%d\n%s\n%s", timestamp, nonce, string(payload))
-}
-
 func (w *whk) ValidateSignature(timestamp int64, nonce string, payload []byte, signature string) error {
 	if err := w.ValidateTimestamp(timestamp); err != nil {
 		return err
@@ -48,8 +43,7 @@ func (w *whk) ValidateSignature(timestamp int64, nonce string, payload []byte, s
 	if err := w.ValidateNonce(nonce); err != nil {
 		return err
 	}
-	canonicalString := w.generateCanonicalString(timestamp, nonce, payload)
-	generatedSignature := w.signer.GenerateSignature(canonicalString, w.signatureSecret)
+	generatedSignature := w.signer.GenerateSignature(timestamp, nonce, payload, w.signatureSecret)
 	if !w.signer.ValidateSignature(string(generatedSignature), signature) {
 		return ErrInvalidSignature
 	}

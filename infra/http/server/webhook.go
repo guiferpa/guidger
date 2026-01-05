@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/guiferpa/guidger/domain/ledger"
@@ -32,16 +33,18 @@ func ProcessWebhook(whk webhook.Webhook, ldgr ledger.Ledger) http.HandlerFunc {
 			httputil.Error(w, http.StatusBadRequest, err)
 			return
 		}
-		var body ProcessWebhookRequestBody
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			httputil.Error(w, http.StatusBadRequest, err)
-			return
-		}
-		payload, err := json.Marshal(body)
+		payload, err := io.ReadAll(r.Body)
 		if err != nil {
 			httputil.Error(w, http.StatusBadRequest, err)
 			return
 		}
+
+		var body ProcessWebhookRequestBody
+		if err := json.Unmarshal(payload, &body); err != nil {
+			httputil.Error(w, http.StatusBadRequest, err)
+			return
+		}
+
 		if err := whk.ValidateSignature(timestamp, nonce, payload, signature); err != nil {
 			httputil.Error(w, http.StatusUnauthorized, err)
 			return

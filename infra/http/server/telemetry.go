@@ -28,17 +28,19 @@ func NewTelemetry() *Telemetry {
 	}
 }
 
-// IncrementTotalRequests increments the total request counter
+// IncrementTotalRequests increments the total request counter atomically
 func (t *Telemetry) IncrementTotalRequests() {
 	atomic.AddInt64(&t.totalRequests, 1)
 }
 
-// IncrementSuccessRequests increments the success request counter
+// IncrementSuccessRequests increments the success request counter atomically
+// Success requests are those with status codes 2xx or 3xx
 func (t *Telemetry) IncrementSuccessRequests() {
 	atomic.AddInt64(&t.successRequests, 1)
 }
 
-// IncrementErrorRequests increments the error request counter
+// IncrementErrorRequests increments the error request counter atomically
+// Also tracks the error count by status code (protected by mutex)
 func (t *Telemetry) IncrementErrorRequests(statusCode int) {
 	atomic.AddInt64(&t.errorRequests, 1)
 	t.mu.Lock()
@@ -46,17 +48,24 @@ func (t *Telemetry) IncrementErrorRequests(statusCode int) {
 	t.mu.Unlock()
 }
 
-// IncrementWebhookRequests increments the webhook request counter
+// IncrementWebhookRequests increments the webhook request counter atomically
 func (t *Telemetry) IncrementWebhookRequests() {
 	atomic.AddInt64(&t.webhookRequests, 1)
 }
 
-// IncrementBalanceRequests increments the balance request counter
+// IncrementBalanceRequests increments the balance request counter atomically
 func (t *Telemetry) IncrementBalanceRequests() {
 	atomic.AddInt64(&t.balanceRequests, 1)
 }
 
 // GetMetrics returns a snapshot of current metrics
+// The returned map includes:
+//   - total_requests: total number of HTTP requests processed
+//   - success_requests: number of successful requests (2xx, 3xx)
+//   - error_requests: number of failed requests (4xx, 5xx)
+//   - webhook_requests: number of requests to /webhook endpoint
+//   - balance_requests: number of requests to /balance/{user} endpoint
+//   - error_counts: map of status codes to error counts
 func (t *Telemetry) GetMetrics() map[string]interface{} {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -77,7 +86,8 @@ func (t *Telemetry) GetMetrics() map[string]interface{} {
 	}
 }
 
-// TelemetryMiddleware tracks request metrics
+// TelemetryMiddleware creates a middleware that tracks request metrics
+// It increments counters for total requests, success/error counts, and endpoint-specific metrics
 func TelemetryMiddleware(telemetry *Telemetry) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

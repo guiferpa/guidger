@@ -9,6 +9,7 @@
 - ✅ **Decimal Precision**: Handles decimal amounts with exact precision using `mathutil.Big`
 - ✅ **Thread-Safe**: Concurrent request handling with proper synchronization
 - ✅ **Structured Logging**: Request IDs and structured JSON logs
+- ✅ **Telemetry**: Request metrics and error tracking via `/metrics` endpoint
 - ✅ **RESTful API**: Clean endpoints for webhook processing and balance queries
 
 ## Requirements
@@ -104,6 +105,30 @@ Retrieves the balance for a specific user.
 curl http://localhost:8080/balance/user123
 ```
 
+### GET /metrics
+
+Returns telemetry metrics for the service.
+
+**Response:**
+```json
+{
+    "total_requests": 100,
+    "success_requests": 95,
+    "error_requests": 5,
+    "webhook_requests": 80,
+    "balance_requests": 20,
+    "error_counts": {
+        "400": 2,
+        "401": 3
+    }
+}
+```
+
+**Example:**
+```bash
+curl http://localhost:8080/metrics
+```
+
 ## Security
 
 - **HMAC SHA256 Signature Validation**: All webhooks must be signed
@@ -161,6 +186,73 @@ The service uses structured JSON logging with request IDs:
 - Each request gets a unique `X-Request-ID` header
 - Logs include request context, duration, and status codes
 - Errors are logged with full context for debugging
+- Logs are output in JSON format for easy parsing by log aggregation tools
+
+Example log entry:
+```json
+{
+    "time": "2024-01-01T12:00:00Z",
+    "level": "INFO",
+    "msg": "http_request",
+    "request_id": "abc123...",
+    "method": "POST",
+    "path": "/webhook",
+    "status": 200,
+    "duration_ms": 15,
+    "bytes_written": 45,
+    "remote_addr": "127.0.0.1:12345"
+}
+```
+
+## Telemetry
+
+The service provides telemetry metrics via the `/metrics` endpoint:
+- **Total Requests**: Total number of HTTP requests processed
+- **Success Requests**: Number of successful requests (status 2xx, 3xx)
+- **Error Requests**: Number of failed requests (status 4xx, 5xx)
+- **Endpoint Metrics**: Separate counters for webhook and balance endpoints
+- **Error Breakdown**: Count of errors by HTTP status code
+
+All metrics are tracked in-memory and reset when the server restarts.
+
+## Usage Examples
+
+### Complete Webhook Flow
+
+1. Generate a signature for your webhook request:
+```bash
+# Set your secret
+export WEBHOOK_SECRET="your-secret-key"
+
+# Prepare request data
+TIMESTAMP=$(date +%s)
+NONCE=$(uuidgen)
+PAYLOAD='{"user":"user123","asset":"BTC","amount":"1.5"}'
+
+# Generate canonical string
+CANONICAL="${TIMESTAMP}\n${NONCE}\n${PAYLOAD}"
+
+# Generate HMAC SHA256 signature (using openssl)
+SIGNATURE=$(echo -n "$CANONICAL" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" | cut -d' ' -f2)
+
+# Send webhook
+curl -X POST http://localhost:8080/webhook \
+  -H "Content-Type: application/json" \
+  -H "X-Timestamp: $TIMESTAMP" \
+  -H "X-Nonce: $NONCE" \
+  -H "X-Signature: $SIGNATURE" \
+  -d "$PAYLOAD"
+```
+
+2. Check user balance:
+```bash
+curl http://localhost:8080/balance/user123
+```
+
+3. Monitor service metrics:
+```bash
+curl http://localhost:8080/metrics | jq
+```
 
 ## License
 

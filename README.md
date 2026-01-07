@@ -1,5 +1,10 @@
 # Guidger
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/guiferpa/guidger.svg)](https://pkg.go.dev/github.com/guiferpa/guidger)
+[![Go Report Card](https://goreportcard.com/badge/github.com/guiferpa/guidger)](https://goreportcard.com/report/github.com/guiferpa/guidger)
+[![Pipeline status](https://github.com/guiferpa/guidger/actions/workflows/test.yml/badge.svg)](https://github.com/guiferpa/guidger/actions/workflows/test.yml)
+
+
 📒 Guidger is a signed webhook service that handles balance updates via webhooks sent from an external system.
 
 ## Features
@@ -164,14 +169,14 @@ curl http://localhost:8080/metrics
 
 ## Architecture
 
-The project follows a clean architecture pattern:
+The project follows a clean architecture pattern that separates business logic from infrastructure concerns:
 
 ```
 guidger/
 ├── cmd/server/          # Application entry point
-├── domain/              # Business logic
+├── domain/              # Business logic (core domain rules)
 │   ├── ledger/         # Ledger domain logic
-│   └── webhook/        # Webhook validation logic
+│   └── webhook/        # Webhook domain logic
 ├── infra/              # Infrastructure implementations
 │   ├── http/server/    # HTTP handlers and middleware
 │   ├── signer/hmac/    # HMAC signature implementation
@@ -181,22 +186,58 @@ guidger/
 └── httputil/           # HTTP utility functions
 ```
 
+### Architecture Benefits
+
+**Separation of Concerns:**
+- **Domain layer** (`domain/`) contains pure business logic with no external dependencies
+- **Infrastructure layer** (`infra/`) handles technical details (HTTP, storage, signing)
+- Business rules are independent of implementation details
+
+**Testability:**
+- Domain logic can be tested in isolation using mocks
+- Infrastructure can be swapped without changing business logic
+- Clear interfaces enable easy unit and integration testing
+
+**Maintainability:**
+- Changes to infrastructure don't affect domain logic
+- Business rules are centralized and easy to understand
+- Clear boundaries make the codebase easier to navigate
+
+**Flexibility:**
+- Easy to add new storage backends (database, Redis, etc.)
+- Can swap HTTP frameworks without changing domain logic
+- Signing algorithms can be changed by implementing the `Signer` interface
+
 ## Testing
 
-Run all tests:
+### Using Make (Recommended)
+
 ```bash
-go test ./...
+# Run all tests with coverage and formatted output
+make test
+
 ```
 
-Run tests with coverage:
-```bash
-go test ./... -cover
-```
+### Test Types
 
-Run integration tests:
-```bash
-go test ./infra/http/server/... -v
-```
+The project includes comprehensive test coverage with both unit and integration tests:
+
+**Unit Tests:**
+- `mathutil.Big` - Decimal precision operations (creation, addition, precision preservation)
+- `domain/webhook` - Webhook validation logic (timestamp, nonce, signature validation)
+- `infra/storage/memory` - Storage operations (ledger updates, nonce tracking)
+
+**Integration Tests:**
+- `infra/http/server` - End-to-end HTTP endpoint testing:
+  - `POST /webhook` - Success scenarios, invalid signatures, expired timestamps, duplicate nonces, missing headers
+  - `GET /balance/{user}` - User balances, empty balances, missing user parameter
+  - Full webhook-to-balance flow testing
+
+**Test Coverage:**
+- All domain logic is covered by unit tests
+- All HTTP endpoints are covered by integration tests
+- Race detector enabled for concurrent safety testing
+- 9+ integration tests covering all major scenarios
 
 ## Decimal Precision
 

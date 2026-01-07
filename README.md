@@ -20,11 +20,33 @@
 
 ## Installation
 
-```bash
-git clone https://github.com/guiferpa/guidger.git
-cd guidger
-go build -o bin/server ./cmd/server
-```
+
+### Using Make
+
+The project includes a Makefile with convenient commands for development and CI/CD:
+
+**Available Make targets:**
+
+| Target | Description | Output |
+|--------|-------------|--------|
+| `all` | Run tests, lint, and build (default workflow) | Runs `test`, `lint`, and `build-force` |
+| `server` | Build the server binary | Creates `./target/bin/server` |
+| `test` | Run all tests with coverage | Uses `tparse` for formatted output |
+| `lint` | Run golangci-lint on the codebase | Auto-installs linter if needed |
+| `bench` | Run benchmarks | Tests with 1, 2, 4, and 12 CPUs |
+| `cover-html` | Generate and open HTML coverage report | Opens coverage in browser |
+| `clean` | Remove build artifacts | Removes `./target/bin` directory |
+
+**Build Configuration:**
+- Binary output: `./target/bin/server`
+- Build flags: `CGO_ENABLED=0` (static binary), `-race` (race detector enabled)
+- Test flags: `-v -json -race -buildvcs -cover`
+
+**Dependencies:**
+The Makefile automatically installs required tools:
+- `golangci-lint`: For code linting
+- `tparse`: For formatted test output
+- `act`: For GitHub Actions workflow testing (optional)
 
 ## Configuration
 
@@ -38,9 +60,13 @@ The service uses environment variables for configuration:
 ### Example
 
 ```bash
+# Build the server
+make server
+
+# Run the server
 export WEBHOOK_SECRET=your-secret-key-here
 export PORT=8080
-./bin/server
+./target/bin/server
 ```
 
 ## API Endpoints
